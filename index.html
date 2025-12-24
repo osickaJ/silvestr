@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .screen {
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        .participant-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .participant-item {
+            padding: 10px;
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .answer-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .answer-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .status-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .waiting-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .question-display {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #004085;
+        }
+        
+        .admin-controls {
+            background: #fff3e0;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px 25px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 5px;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Quiz Competition</h1>
+        
+        <!-- Join Screen -->
+        <div id="joinScreen" class="screen active">
+            <h2>Join the Competition</h2>
+            <input type="text" id="nameInput" placeholder="Enter your name" maxlength="50">
+            <button onclick="joinQuiz()">Join Quiz</button>
+        </div>
+        
+        <!-- Participant Waiting Screen -->
+        <div id="waitingScreen" class="screen">
+            <h2>Welcome, <span id="participantName"></span>!</h2>
+            <div class="waiting-message">
+                Waiting for the host to start the next question...
+            </div>
+        </div>
+        
+        <!-- Answer Screen -->
+        <div id="answerScreen" class="screen">
+            <h2>Question Time!</h2>
+            <div class="question-display" id="currentQuestion"></div>
+            <textarea id="answerInput" placeholder="Type your answer here..."></textarea>
+            <button onclick="submitAnswer()">Submit Answer</button>
+        </div>
+        
+        <!-- Answer Submitted Screen -->
+        <div id="submittedScreen" class="screen">
+            <div class="status-message">
+                ✓ Your answer has been submitted!
+            </div>
+            <div class="waiting-message">
+                Waiting for other participants and for the host to reveal answers...
+            </div>
+        </div>
+        
+        <!-- Admin Screen -->
+        <div id="adminScreen" class="screen">
+            <h2>Host Control Panel</h2>
+            
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="participantCount">0</div>
+                    <div class="stat-label">Participants</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="answerCount">0</div>
+                    <div class="stat-label">Answers Received</div>
+                </div>
+            </div>
+            
+            <div class="admin-controls">
+                <h3>Start New Question</h3>
+                <input type="text" id="questionInput" placeholder="Enter the question">
+                <button onclick="startQuestion()">Start Question</button>
+            </div>
+            
+            <div class="admin-controls">
+                <h3>Current Question Controls</h3>
+                <button onclick="revealAnswers()">Reveal Answers</button>
+                <button class="secondary" onclick="closeQuestion()">Close Question & Return</button>
+            </div>
+            
+            <div id="participantsSection">
+                <h3>Participants</h3>
+                <div class="participant-list" id="participantsList"></div>
+            </div>
+        </div>
+        
+        <!-- Answer Display Screen -->
+        <div id="displayScreen" class="screen">
+            <h2>Answers Revealed</h2>
+            <div class="question-display" id="displayQuestion"></div>
+            <div id="answersList"></div>
+            <button onclick="backToAdmin()">Back to Control Panel</button>
+            <button class="secondary" onclick="startQuestion()">Start New Question</button>
+        </div>
+        
+        <!-- Admin Access -->
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="secondary" onclick="showAdminPanel()" id="adminButton">Host Panel</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let isAdmin = false;
+        let participants = [];
+        let currentQuestion = null;
+        let answers = {};
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+        
+        function joinQuiz() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            currentUser = name;
+            
+            if (!participants.find(p => p === name)) {
+                participants.push(name);
+            }
+            
+            document.getElementById('participantName').textContent = name;
+            showScreen('waitingScreen');
+            updateAdminDisplay();
+        }
+        
+        function showAdminPanel() {
+            isAdmin = true;
+            showScreen('adminScreen');
+            updateAdminDisplay();
+        }
+        
+        function updateAdminDisplay() {
+            document.getElementById('participantCount').textContent = participants.length;
+            document.getElementById('answerCount').textContent = Object.keys(answers).length;
+            
+            const list = document.getElementById('participantsList');
+            list.innerHTML = participants.map(p => 
+                `<div class="participant-item">${p}</div>`
+            ).join('');
+        }
+        
+        function startQuestion() {
+            const questionText = document.getElementById('questionInput').value.trim();
+            if (!questionText) {
+                alert('Please enter a question');
+                return;
+            }
+            
+            currentQuestion = questionText;
+            answers = {};
+            document.getElementById('questionInput').value = '';
+            
+            // Update all participant screens
+            document.getElementById('currentQuestion').textContent = currentQuestion;
+            
+            if (!isAdmin) {
+                showScreen('answerScreen');
+            } else {
+                updateAdminDisplay();
+                alert('Question started! Participants can now answer.');
+            }
+        }
+        
+        function submitAnswer() {
+            const answer = document.getElementById('answerInput').value.trim();
+            if (!answer) {
+                alert('Please enter an answer');
+                return;
+            }
+            
+            answers[currentUser] = answer;
+            document.getElementById('answerInput').value = '';
+            showScreen('submittedScreen');
+            updateAdminDisplay();
+        }
+        
+        function revealAnswers() {
+            if (Object.keys(answers).length === 0) {
+                alert('No answers received yet!');
+                return;
+            }
+            
+            document.getElementById('displayQuestion').textContent = currentQuestion;
+            
+            const answersList = document.getElementById('answersList');
+            answersList.innerHTML = Object.entries(answers)
+                .map(([name, answer]) => `
+                    <div class="answer-item">
+                        <strong>${name}</strong>
+                        <div>${answer}</div>
+                    </div>
+                `).join('');
+            
+            showScreen('displayScreen');
+        }
+        
+        function backToAdmin() {
+            showScreen('adminScreen');
+            updateAdminDisplay();
+        }
+        
+        function closeQuestion() {
+            currentQuestion = null;
+            answers = {};
+            updateAdminDisplay();
+            alert('Question closed. Ready for next question.');
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('nameInput')?.addEventListener('keypress', e => {
+            if (e.key === 'Enter') joinQuiz();
+        });
+    </script>
+</body>
+</html>
