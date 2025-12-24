@@ -5,9 +5,12 @@
 <title>Quiz Host</title>
 <style>
 body { font-family: Arial; padding: 30px; background: #f4f4f4; }
-.box { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; }
+.box { background: white; padding: 20px; border-radius: 8px; max-width: 700px; margin: auto; margin-bottom: 20px; }
 button { padding: 10px 20px; margin-top: 10px; }
 .answer { border-left: 4px solid #667eea; padding: 10px; margin: 10px 0; }
+input.correct { width: 60px; margin-left: 10px; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
 </style>
 </head>
 <body>
@@ -20,14 +23,23 @@ button { padding: 10px 20px; margin-top: 10px; }
 </div>
 
 <div class="box" id="hostPanel" style="display:none">
-  <h2>All Answers</h2>
+  <h2>Current Answers</h2>
   <div id="answers"></div>
-  <button onclick="clearQuiz()">Reset Quiz</button>
+  <button onclick="clearQuiz()">Clear Current Answers</button>
+  
+  <h2>Assign Points</h2>
+  <button onclick="savePoints()">Save Points</button>
+  
+  <h2>Results Table</h2>
+  <table>
+    <thead><tr><th>Participant</th><th>Points</th></tr></thead>
+    <tbody id="results"></tbody>
+  </table>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, remove, update, get, child } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
 // 🔴 Replace with your Firebase config
 const firebaseConfig = {
@@ -42,33 +54,61 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
 const HOST_PASSWORD = "host123";
 
-// Expose to global scope for button onclick
+let currentAnswers = {};
+
 window.loginHost = () => {
   const pass = document.getElementById("hostPass").value;
   if (pass !== HOST_PASSWORD) return alert("Wrong password");
-
   document.getElementById("hostPanel").style.display = "block";
 
-  // Listen for all answers in real-time
+  // Listen for all answers
   onValue(ref(db, "quiz/answers"), snapshot => {
     const answersDiv = document.getElementById("answers");
     answersDiv.innerHTML = "";
-    const data = snapshot.val() || {};
-    for (const name in data) {
+    currentAnswers = snapshot.val() || {};
+    for (const name in currentAnswers) {
       answersDiv.innerHTML += `
         <div class="answer">
-          <strong>${name}</strong><br>${data[name]}
+          <strong>${name}</strong>: ${currentAnswers[name]} 
+          <input class="correct" type="number" placeholder="Points" min="0" id="points-${name}">
         </div>
       `;
     }
   });
+
+  // Load current points
+  updateResultsTable();
 };
 
-// Clear entire quiz
-window.clearQuiz = () => remove(ref(db, "quiz"));
+// Save points
+window.savePoints = async () => {
+  const updates = {};
+  for (const name in currentAnswers) {
+    const val = parseInt(document.getElementById(`points-${name}`).value) || 0;
+    const snap = await get(child(ref(db), "quiz/points/" + name));
+    const oldPoints = snap.exists() ? snap.val() : 0;
+    updates["quiz/points/" + name] = oldPoints + val;
+  }
+  update(ref(db), updates);
+  alert("Points saved!");
+  updateResultsTable();
+};
+
+// Update results table
+async function updateResultsTable() {
+  const snap = await get(ref(db, "quiz/points")) || {};
+  const data = snap.val() || {};
+  const tbody = document.getElementById("results");
+  tbody.innerHTML = "";
+  for (const name in data) {
+    tbody.innerHTML += `<tr><td>${name}</td><td>${data[name]}</td></tr>`;
+  }
+}
+
+// Clear current answers only (keep points)
+window.clearQuiz = () => remove(ref(db, "quiz/answers"));
 </script>
 
 </body>
