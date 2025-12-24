@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiz Participant</title>
+<style>
+body { font-family: Arial; padding: 30px; background: #f4f4f4; }
+.box { background: white; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; }
+input, textarea { width: 100%; padding: 10px; margin-top: 10px; }
+button { padding: 10px 20px; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Quiz Participant</h1>
+<div class="box">
+  <input id="name" placeholder="Your name">
+  <textarea id="answer" placeholder="Your answer"></textarea>
+  <button onclick="submitAnswer()">Submit Answer</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+window.submitAnswer = function () {
+  const name = document.getElementById("name").value.trim();
+  const answer = document.getElementById("answer").value.trim();
+  if (!name || !answer) return alert("Enter name and answer");
+
+  set(ref(db, "quiz/answers/" + name), answer);
+  alert("Answer submitted!");
+  document.getElementById("answer").value = "";
+};
+</script>
+
+</body>
+</html>
