@@ -30,7 +30,7 @@ th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
   <h2>Assign Points</h2>
   <button onclick="savePoints()">Save Points</button>
   
-  <h2>Results Table</h2>
+  <h2>Results Table (Sorted by Points)</h2>
   <table>
     <thead><tr><th>Participant</th><th>Points</th></tr></thead>
     <tbody id="results"></tbody>
@@ -96,15 +96,19 @@ window.savePoints = async () => {
   updateResultsTable();
 };
 
-// Update results table
+// Update results table (sorted by points descending)
 async function updateResultsTable() {
-  const snap = await get(ref(db, "quiz/points")) || {};
-  const data = snap.val() || {};
+  const snap = await get(ref(db, "quiz/points"));
+  const data = snap.exists() ? snap.val() : {};
   const tbody = document.getElementById("results");
   tbody.innerHTML = "";
-  for (const name in data) {
-    tbody.innerHTML += `<tr><td>${name}</td><td>${data[name]}</td></tr>`;
-  }
+
+  // Convert to array and sort descending
+  const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+
+  sorted.forEach(([name, points]) => {
+    tbody.innerHTML += `<tr><td>${name}</td><td>${points}</td></tr>`;
+  });
 }
 
 // Clear current answers only (keep points)
