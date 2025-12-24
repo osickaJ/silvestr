@@ -13,6 +13,7 @@ button { padding: 10px 20px; margin-top: 10px; }
 <body>
 
 <h1>Quiz Host</h1>
+
 <div class="box">
   <input id="hostPass" type="password" placeholder="Host password">
   <button onclick="loginHost()">Login</button>
@@ -28,39 +29,46 @@ button { padding: 10px 20px; margin-top: 10px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
+// 🔴 Replace with your Firebase config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB00W060jXbGOyS1b9n2C0UqFnA8PFAKSI",
+  authDomain: "silvestr-1e6ec.firebaseapp.com",
+  databaseURL: "https://silvestr-1e6ec-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "silvestr-1e6ec",
+  storageBucket: "silvestr-1e6ec.firebasestorage.app",
+  messagingSenderId: "577505609586",
+  appId: "1:577505609586:web:53f14b1e087d0a19aa3feb"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+
 const HOST_PASSWORD = "host123";
 
-window.loginHost = function () {
+// Expose to global scope for button onclick
+window.loginHost = () => {
   const pass = document.getElementById("hostPass").value;
   if (pass !== HOST_PASSWORD) return alert("Wrong password");
 
   document.getElementById("hostPanel").style.display = "block";
 
+  // Listen for all answers in real-time
   onValue(ref(db, "quiz/answers"), snapshot => {
     const answersDiv = document.getElementById("answers");
     answersDiv.innerHTML = "";
     const data = snapshot.val() || {};
     for (const name in data) {
-      answersDiv.innerHTML += `<div class="answer"><strong>${name}</strong><br>${data[name]}</div>`;
+      answersDiv.innerHTML += `
+        <div class="answer">
+          <strong>${name}</strong><br>${data[name]}
+        </div>
+      `;
     }
   });
 };
 
-window.clearQuiz = function () {
-  remove(ref(db, "quiz"));
-};
+// Clear entire quiz
+window.clearQuiz = () => remove(ref(db, "quiz"));
 </script>
 
 </body>
