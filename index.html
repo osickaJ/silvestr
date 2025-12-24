@@ -331,7 +331,13 @@
                 const result = await window.storage.get('quiz-state', true);
                 return result ? JSON.parse(result.value) : null;
             } catch (error) {
-                return null;
+                // Key doesn't exist yet, return default state
+                return {
+                    participants: [],
+                    currentQuestion: null,
+                    answers: {},
+                    status: 'waiting'
+                };
             }
         }
         
@@ -367,17 +373,22 @@
                 return;
             }
             
-            currentUser = name;
-            
-            const state = await getGameState();
-            if (!state.participants.includes(name)) {
-                state.participants.push(name);
-                await saveGameState(state);
+            try {
+                currentUser = name;
+                
+                const state = await getGameState();
+                if (!state.participants.includes(name)) {
+                    state.participants.push(name);
+                    await saveGameState(state);
+                }
+                
+                document.getElementById('participantName').textContent = name;
+                showScreen('waitingScreen');
+                startPolling();
+            } catch (error) {
+                console.error('Error joining:', error);
+                alert('Error joining quiz. Please try again.');
             }
-            
-            document.getElementById('participantName').textContent = name;
-            showScreen('waitingScreen');
-            startPolling();
         }
         
         async function loginAdmin() {
