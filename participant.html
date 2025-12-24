@@ -13,6 +13,7 @@ button { padding: 10px 20px; margin-top: 10px; }
 <body>
 
 <h1>Quiz Participant</h1>
+
 <div class="box">
   <input id="name" placeholder="Your name">
   <textarea id="answer" placeholder="Your answer"></textarea>
@@ -23,27 +24,33 @@ button { padding: 10px 20px; margin-top: 10px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
 
+// 🔴 Replace with your Firebase config
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB00W060jXbGOyS1b9n2C0UqFnA8PFAKSI",
+  authDomain: "silvestr-1e6ec.firebaseapp.com",
+  databaseURL: "https://silvestr-1e6ec-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "silvestr-1e6ec",
+  storageBucket: "silvestr-1e6ec.firebasestorage.app",
+  messagingSenderId: "577505609586",
+  appId: "1:577505609586:web:53f14b1e087d0a19aa3feb"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-window.submitAnswer = function () {
+// Expose function globally
+window.submitAnswer = () => {
   const name = document.getElementById("name").value.trim();
   const answer = document.getElementById("answer").value.trim();
-  if (!name || !answer) return alert("Enter name and answer");
+  if (!name || !answer) return alert("Please enter your name and answer");
 
-  set(ref(db, "quiz/answers/" + name), answer);
-  alert("Answer submitted!");
-  document.getElementById("answer").value = "";
+  // Write participant answer to Firebase
+  set(ref(db, "quiz/answers/" + name), answer)
+    .then(() => {
+      alert("Answer submitted!");
+      document.getElementById("answer").value = "";
+    })
+    .catch((err) => alert("Error submitting answer: " + err));
 };
 </script>
 
