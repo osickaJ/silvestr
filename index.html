@@ -2,88 +2,126 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Simple Quiz</title>
+<title>Simple Realtime Quiz</title>
+
 <style>
-body { font-family: Arial; background: #f4f4f4; padding: 30px; }
-.box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
-button { padding: 10px 20px; margin-top: 10px; }
-textarea, input { width: 100%; padding: 10px; margin-top: 10px; }
-.answer { border-left: 4px solid #667eea; padding: 10px; margin: 10px 0; }
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  padding: 30px;
+}
+.box {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+}
+.answer {
+  border-left: 4px solid #667eea;
+  padding: 10px;
+  margin: 10px 0;
+}
 </style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getDatabase, ref, set, onValue, remove }
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+  /* 🔴 YOUR FIREBASE CONFIG */
+  const firebaseConfig = {
+    apiKey: "AIzaSyB00W060jXbGOyS1b9n2C0UqFnA8PFAKSI",
+    authDomain: "silvestr-1e6ec.firebaseapp.com",
+    databaseURL: "https://silvestr-1e6ec-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "silvestr-1e6ec",
+    storageBucket: "silvestr-1e6ec.firebasestorage.app",
+    messagingSenderId: "577505609586",
+    appId: "1:577505609586:web:53f14b1e087d0a19aa3feb"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const HOST_PASSWORD = "host123";
+
+  /* PARTICIPANT */
+  window.submitAnswer = function () {
+    const name = document.getElementById("name").value.trim();
+    const answer = document.getElementById("answer").value.trim();
+
+    if (!name || !answer) {
+      alert("Please enter name and answer");
+      return;
+    }
+
+    set(ref(db, "quiz/answers/" + name), answer);
+    alert("Answer submitted");
+    document.getElementById("answer").value = "";
+  };
+
+  /* HOST */
+  window.loginHost = function () {
+    const pass = document.getElementById("hostPass").value;
+    if (pass !== HOST_PASSWORD) {
+      alert("Wrong password");
+      return;
+    }
+
+    document.getElementById("hostPanel").style.display = "block";
+
+    onValue(ref(db, "quiz/answers"), snapshot => {
+      const answersDiv = document.getElementById("answers");
+      answersDiv.innerHTML = "";
+
+      const data = snapshot.val() || {};
+      for (const name in data) {
+        answersDiv.innerHTML += `
+          <div class="answer">
+            <strong>${name}</strong><br>${data[name]}
+          </div>
+        `;
+      }
+    });
+  };
+
+  window.clearQuiz = function () {
+    remove(ref(db, "quiz"));
+  };
+</script>
 </head>
+
 <body>
 
-<h1>Simple Quiz (Static Demo)</h1>
+<h1>Simple Realtime Quiz</h1>
 
 <div class="box">
-<h2>Participant</h2>
-<input id="name" placeholder="Your name">
-<textarea id="answer" placeholder="Your answer"></textarea>
-<button onclick="submitAnswer()">Submit Answer</button>
+  <h2>Participant</h2>
+  <input id="name" placeholder="Your name">
+  <textarea id="answer" placeholder="Your answer"></textarea>
+  <button onclick="submitAnswer()">Submit Answer</button>
 </div>
 
 <div class="box">
-<h2>Host</h2>
-<input id="hostPass" type="password" placeholder="Host password">
-<button onclick="loginHost()">Login as Host</button>
+  <h2>Host</h2>
+  <input id="hostPass" type="password" placeholder="Host password">
+  <button onclick="loginHost()">Login as Host</button>
 
-<div id="hostPanel" style="display:none">
-<h3>Answers</h3>
-<div id="answers"></div>
-<button onclick="clearQuiz()">Reset Quiz</button>
+  <div id="hostPanel" style="display:none">
+    <h3>Answers</h3>
+    <div id="answers"></div>
+    <button onclick="clearQuiz()">Reset Quiz</button>
+  </div>
 </div>
-</div>
-
-<script>
-const HOST_PASSWORD = "host123";
-
-function getData() {
-  return JSON.parse(localStorage.getItem("quiz")) || {};
-}
-
-function saveData(data) {
-  localStorage.setItem("quiz", JSON.stringify(data));
-}
-
-function submitAnswer() {
-  const name = document.getElementById("name").value.trim();
-  const answer = document.getElementById("answer").value.trim();
-  if (!name || !answer) return alert("Fill name and answer");
-
-  const data = getData();
-  data[name] = answer;
-  saveData(data);
-
-  alert("Answer submitted");
-  document.getElementById("answer").value = "";
-}
-
-function loginHost() {
-  const pass = document.getElementById("hostPass").value;
-  if (pass !== HOST_PASSWORD) return alert("Wrong password");
-
-  document.getElementById("hostPanel").style.display = "block";
-  loadAnswers();
-}
-
-function loadAnswers() {
-  const data = getData();
-  const out = document.getElementById("answers");
-  out.innerHTML = "";
-
-  Object.entries(data).forEach(([name, answer]) => {
-    out.innerHTML += `
-      <div class="answer">
-        <strong>${name}</strong><br>${answer}
-      </div>`;
-  });
-}
-
-function clearQuiz() {
-  localStorage.removeItem("quiz");
-  loadAnswers();
-}
-</script>
 
 </body>
 </html>
