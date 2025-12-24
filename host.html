@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiz Host</title>
+<style>
+body { font-family: Arial; padding: 30px; background: #f4f4f4; }
+.box { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; }
+button { padding: 10px 20px; margin-top: 10px; }
+.answer { border-left: 4px solid #667eea; padding: 10px; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<h1>Quiz Host</h1>
+<div class="box">
+  <input id="hostPass" type="password" placeholder="Host password">
+  <button onclick="loginHost()">Login</button>
+</div>
+
+<div class="box" id="hostPanel" style="display:none">
+  <h2>All Answers</h2>
+  <div id="answers"></div>
+  <button onclick="clearQuiz()">Reset Quiz</button>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "YOUR_DATABASE_URL",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const HOST_PASSWORD = "host123";
+
+window.loginHost = function () {
+  const pass = document.getElementById("hostPass").value;
+  if (pass !== HOST_PASSWORD) return alert("Wrong password");
+
+  document.getElementById("hostPanel").style.display = "block";
+
+  onValue(ref(db, "quiz/answers"), snapshot => {
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+    const data = snapshot.val() || {};
+    for (const name in data) {
+      answersDiv.innerHTML += `<div class="answer"><strong>${name}</strong><br>${data[name]}</div>`;
+    }
+  });
+};
+
+window.clearQuiz = function () {
+  remove(ref(db, "quiz"));
+};
+</script>
+
+</body>
+</html>
