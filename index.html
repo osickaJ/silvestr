@@ -1,530 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        
-        h1 {
-            color: #667eea;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        .screen {
-            display: none;
-        }
-        
-        .screen.active {
-            display: block;
-        }
-        
-        input[type="text"], input[type="password"], textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            transition: border-color 0.3s;
-        }
-        
-        input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-            font-family: inherit;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-right: 10px;
-            margin-bottom: 10px;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button.secondary {
-            background: #6c757d;
-        }
-        
-        button.danger {
-            background: #dc3545;
-        }
-        
-        .participant-list {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .participant-item {
-            padding: 10px;
-            background: white;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .answer-item {
-            background: #f8f9fa;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #28a745;
-        }
-        
-        .answer-item strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .status-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-        }
-        
-        .waiting-message {
-            background: #fff3cd;
-            color: #856404;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #ffc107;
-        }
-        
-        .question-display {
-            background: #e7f3ff;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: 500;
-            color: #004085;
-        }
-        
-        .admin-controls {
-            background: #fff3e0;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .stats {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-box {
-            background: #f8f9fa;
-            padding: 15px 25px;
-            border-radius: 10px;
-            text-align: center;
-            margin: 5px;
-        }
-        
-        .stat-number {
-            font-size: 32px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        .stat-label {
-            color: #6c757d;
-            margin-top: 5px;
-        }
-
-        .admin-login {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Simple Quiz</title>
+<style>
+body { font-family: Arial; background: #f4f4f4; padding: 30px; }
+.box { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+button { padding: 10px 20px; margin-top: 10px; }
+textarea, input { width: 100%; padding: 10px; margin-top: 10px; }
+.answer { border-left: 4px solid #667eea; padding: 10px; margin: 10px 0; }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎯 Quiz Competition</h1>
-        
-        <!-- Join Screen -->
-        <div id="joinScreen" class="screen active">
-            <h2>Join the Competition</h2>
-            <input type="text" id="nameInput" placeholder="Enter your name" maxlength="50">
-            <button onclick="joinQuiz()">Join Quiz</button>
 
-            <div class="admin-login">
-                <h3>Host Access</h3>
-                <input type="password" id="adminPassword" placeholder="Enter host password">
-                <button class="secondary" onclick="loginAdmin()">Login as Host</button>
-            </div>
-        </div>
-        
-        <!-- Participant Waiting Screen -->
-        <div id="waitingScreen" class="screen">
-            <h2>Welcome, <span id="participantName"></span>!</h2>
-            <div class="waiting-message">
-                Waiting for the host to start the next question...
-            </div>
-        </div>
-        
-        <!-- Answer Screen -->
-        <div id="answerScreen" class="screen">
-            <h2>Question Time!</h2>
-            <div class="question-display" id="currentQuestion"></div>
-            <textarea id="answerInput" placeholder="Type your answer here..."></textarea>
-            <button onclick="submitAnswer()">Submit Answer</button>
-        </div>
-        
-        <!-- Answer Submitted Screen -->
-        <div id="submittedScreen" class="screen">
-            <div class="status-message">
-                ✓ Your answer has been submitted!
-            </div>
-            <div class="waiting-message">
-                Waiting for the host to reveal answers...
-            </div>
-        </div>
-        
-        <!-- Admin Screen -->
-        <div id="adminScreen" class="screen">
-            <h2>Host Control Panel</h2>
-            
-            <div class="stats">
-                <div class="stat-box">
-                    <div class="stat-number" id="participantCount">0</div>
-                    <div class="stat-label">Participants</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number" id="answerCount">0</div>
-                    <div class="stat-label">Answers Received</div>
-                </div>
-            </div>
-            
-            <div class="admin-controls">
-                <h3>Start New Question</h3>
-                <input type="text" id="questionInput" placeholder="Enter the question">
-                <button onclick="startQuestion()">Start Question</button>
-            </div>
-            
-            <div class="admin-controls">
-                <h3>Current Question Controls</h3>
-                <button onclick="revealAnswers()">Reveal Answers</button>
-                <button class="secondary" onclick="closeQuestion()">Close Question & Return to Waiting</button>
-            </div>
-            
-            <div id="participantsSection">
-                <h3>Participants</h3>
-                <div class="participant-list" id="participantsList"></div>
-            </div>
+<h1>Simple Quiz (Static Demo)</h1>
 
-            <button class="danger" onclick="resetQuiz()">Reset Entire Quiz</button>
-        </div>
-        
-        <!-- Answer Display Screen -->
-        <div id="displayScreen" class="screen">
-            <h2>Answers Revealed</h2>
-            <div class="question-display" id="displayQuestion"></div>
-            <div id="answersList"></div>
-            <button onclick="backToAdmin()">Back to Control Panel</button>
-            <button class="secondary" onclick="returnToWaiting()">Close & Return All to Waiting</button>
-        </div>
-    </div>
+<div class="box">
+<h2>Participant</h2>
+<input id="name" placeholder="Your name">
+<textarea id="answer" placeholder="Your answer"></textarea>
+<button onclick="submitAnswer()">Submit Answer</button>
+</div>
 
-    <script>
-        const ADMIN_PASSWORD = "host123"; // Change this to your desired password
-        let currentUser = null;
-        let isAdmin = false;
-        let pollInterval = null;
-        
-        // Initialize polling for state changes
-        function startPolling() {
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(checkForUpdates, 1000);
-        }
-        
-        async function checkForUpdates() {
-            try {
-                const state = await getGameState();
-                if (!state) return;
-                
-                if (isAdmin) {
-                    updateAdminDisplay();
-                } else if (currentUser) {
-                    // Participant logic
-                    if (state.currentQuestion && state.status === 'active') {
-                        // Question is active
-                        const userAnswer = state.answers[currentUser];
-                        if (userAnswer) {
-                            showScreen('submittedScreen');
-                        } else {
-                            document.getElementById('currentQuestion').textContent = state.currentQuestion;
-                            showScreen('answerScreen');
-                        }
-                    } else if (state.status === 'revealed') {
-                        // Answers are being shown - participants wait
-                        showScreen('waitingScreen');
-                    } else {
-                        // Waiting for next question
-                        showScreen('waitingScreen');
-                    }
-                }
-            } catch (error) {
-                console.error('Error polling:', error);
-            }
-        }
-        
-        async function getGameState() {
-            try {
-                const result = await window.storage.get('quiz-state', true);
-                return result ? JSON.parse(result.value) : null;
-            } catch (error) {
-                // Key doesn't exist yet, return default state
-                return {
-                    participants: [],
-                    currentQuestion: null,
-                    answers: {},
-                    status: 'waiting'
-                };
-            }
-        }
-        
-        async function saveGameState(state) {
-            try {
-                await window.storage.set('quiz-state', JSON.stringify(state), true);
-            } catch (error) {
-                console.error('Error saving state:', error);
-            }
-        }
-        
-        async function initializeGameState() {
-            const state = await getGameState();
-            if (!state) {
-                await saveGameState({
-                    participants: [],
-                    currentQuestion: null,
-                    answers: {},
-                    status: 'waiting' // waiting, active, revealed
-                });
-            }
-        }
-        
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-        
-        async function joinQuiz() {
-            const name = document.getElementById('nameInput').value.trim();
-            if (!name) {
-                alert('Please enter your name');
-                return;
-            }
-            
-            try {
-                currentUser = name;
-                
-                const state = await getGameState();
-                if (!state.participants.includes(name)) {
-                    state.participants.push(name);
-                    await saveGameState(state);
-                }
-                
-                document.getElementById('participantName').textContent = name;
-                showScreen('waitingScreen');
-                startPolling();
-            } catch (error) {
-                console.error('Error joining:', error);
-                alert('Error joining quiz. Please try again.');
-            }
-        }
-        
-        async function loginAdmin() {
-            const password = document.getElementById('adminPassword').value;
-            if (password !== ADMIN_PASSWORD) {
-                alert('Incorrect password!');
-                return;
-            }
-            
-            isAdmin = true;
-            showScreen('adminScreen');
-            await initializeGameState();
-            updateAdminDisplay();
-            startPolling();
-        }
-        
-        async function updateAdminDisplay() {
-            const state = await getGameState();
-            if (!state) return;
-            
-            document.getElementById('participantCount').textContent = state.participants.length;
-            document.getElementById('answerCount').textContent = Object.keys(state.answers).length;
-            
-            const list = document.getElementById('participantsList');
-            list.innerHTML = state.participants.map(p => {
-                const hasAnswered = state.answers[p] ? ' ✓' : '';
-                return `<div class="participant-item">${p}${hasAnswered}</div>`;
-            }).join('');
-        }
-        
-        async function startQuestion() {
-            const questionText = document.getElementById('questionInput').value.trim();
-            if (!questionText) {
-                alert('Please enter a question');
-                return;
-            }
-            
-            const state = await getGameState();
-            state.currentQuestion = questionText;
-            state.answers = {};
-            state.status = 'active';
-            await saveGameState(state);
-            
-            document.getElementById('questionInput').value = '';
-            alert('Question started! Participants can now answer.');
-            updateAdminDisplay();
-        }
-        
-        async function submitAnswer() {
-            const answer = document.getElementById('answerInput').value.trim();
-            if (!answer) {
-                alert('Please enter an answer');
-                return;
-            }
-            
-            const state = await getGameState();
-            state.answers[currentUser] = answer;
-            await saveGameState(state);
-            
-            document.getElementById('answerInput').value = '';
-            showScreen('submittedScreen');
-        }
-        
-        async function revealAnswers() {
-            const state = await getGameState();
-            
-            if (Object.keys(state.answers).length === 0) {
-                alert('No answers received yet!');
-                return;
-            }
-            
-            state.status = 'revealed';
-            await saveGameState(state);
-            
-            document.getElementById('displayQuestion').textContent = state.currentQuestion;
-            
-            const answersList = document.getElementById('answersList');
-            answersList.innerHTML = Object.entries(state.answers)
-                .map(([name, answer]) => `
-                    <div class="answer-item">
-                        <strong>${name}</strong>
-                        <div>${answer}</div>
-                    </div>
-                `).join('');
-            
-            showScreen('displayScreen');
-        }
-        
-        function backToAdmin() {
-            showScreen('adminScreen');
-            updateAdminDisplay();
-        }
-        
-        async function closeQuestion() {
-            const state = await getGameState();
-            state.currentQuestion = null;
-            state.answers = {};
-            state.status = 'waiting';
-            await saveGameState(state);
-            
-            alert('Question closed. Participants returned to waiting screen.');
-            updateAdminDisplay();
-        }
+<div class="box">
+<h2>Host</h2>
+<input id="hostPass" type="password" placeholder="Host password">
+<button onclick="loginHost()">Login as Host</button>
 
-        async function returnToWaiting() {
-            await closeQuestion();
-            showScreen('adminScreen');
-        }
-        
-        async function resetQuiz() {
-            if (!confirm('Are you sure you want to reset the entire quiz? This will remove all participants and answers.')) {
-                return;
-            }
-            
-            await saveGameState({
-                participants: [],
-                currentQuestion: null,
-                answers: {},
-                status: 'waiting'
-            });
-            
-            alert('Quiz reset successfully!');
-            updateAdminDisplay();
-        }
-        
-        // Initialize
-        initializeGameState();
-        
-        // Allow Enter key to submit
-        document.getElementById('nameInput')?.addEventListener('keypress', e => {
-            if (e.key === 'Enter') joinQuiz();
-        });
-        
-        document.getElementById('adminPassword')?.addEventListener('keypress', e => {
-            if (e.key === 'Enter') loginAdmin();
-        });
-    </script>
+<div id="hostPanel" style="display:none">
+<h3>Answers</h3>
+<div id="answers"></div>
+<button onclick="clearQuiz()">Reset Quiz</button>
+</div>
+</div>
+
+<script>
+const HOST_PASSWORD = "host123";
+
+function getData() {
+  return JSON.parse(localStorage.getItem("quiz")) || {};
+}
+
+function saveData(data) {
+  localStorage.setItem("quiz", JSON.stringify(data));
+}
+
+function submitAnswer() {
+  const name = document.getElementById("name").value.trim();
+  const answer = document.getElementById("answer").value.trim();
+  if (!name || !answer) return alert("Fill name and answer");
+
+  const data = getData();
+  data[name] = answer;
+  saveData(data);
+
+  alert("Answer submitted");
+  document.getElementById("answer").value = "";
+}
+
+function loginHost() {
+  const pass = document.getElementById("hostPass").value;
+  if (pass !== HOST_PASSWORD) return alert("Wrong password");
+
+  document.getElementById("hostPanel").style.display = "block";
+  loadAnswers();
+}
+
+function loadAnswers() {
+  const data = getData();
+  const out = document.getElementById("answers");
+  out.innerHTML = "";
+
+  Object.entries(data).forEach(([name, answer]) => {
+    out.innerHTML += `
+      <div class="answer">
+        <strong>${name}</strong><br>${answer}
+      </div>`;
+  });
+}
+
+function clearQuiz() {
+  localStorage.removeItem("quiz");
+  loadAnswers();
+}
+</script>
+
 </body>
 </html>
